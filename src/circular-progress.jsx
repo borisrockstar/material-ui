@@ -8,16 +8,46 @@ import ThemeManager from './styles/theme-manager';
 
 const CircularProgress = React.createClass({
 
-  mixins: [StylePropable],
-
   propTypes: {
+    /**
+     * Override the progress's color.
+     */
     color: React.PropTypes.string,
+
+    /**
+     * Style for inner wrapper div.
+     */
     innerStyle: React.PropTypes.object,
+
+    /**
+     * The max value of progress, only works in determinate mode.
+     */
     max: React.PropTypes.number,
+
+    /**
+     * The min value of progress, only works in determinate mode.
+     */
     min: React.PropTypes.number,
+
+    /**
+     * The mode of show your progress, indeterminate
+     * for when there is no value for progress.
+     */
     mode: React.PropTypes.oneOf(['determinate', 'indeterminate']),
+
+    /**
+     * The size of the progress.
+     */
     size: React.PropTypes.number,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
+
+    /**
+     * The value of progress, only works in determinate mode.
+     */
     value: React.PropTypes.number,
   },
 
@@ -30,9 +60,15 @@ const CircularProgress = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [StylePropable],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      mode: 'indeterminate',
+      value: 0,
+      min: 0,
+      max: 100,
+      size: 1,
     };
   },
 
@@ -42,11 +78,30 @@ const CircularProgress = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
+  componentDidMount() {
+    let wrapper = ReactDOM.findDOMNode(this.refs.wrapper);
+    let path = ReactDOM.findDOMNode(this.refs.path);
+
+    this._scalePath(path);
+    this._rotateWrapper(wrapper);
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
+  },
+
+  componentWillUnmount() {
+    clearTimeout(this.scalePathTimer);
+    clearTimeout(this.rotateWrapperTimer);
   },
 
   _getRelativeValue() {
@@ -60,22 +115,14 @@ const CircularProgress = React.createClass({
     return relValue * 100;
   },
 
-  componentDidMount() {
-    let wrapper = ReactDOM.findDOMNode(this.refs.wrapper);
-    let path = ReactDOM.findDOMNode(this.refs.path);
-
-    this._scalePath(path);
-    this._rotateWrapper(wrapper);
-  },
+  scalePathTimer: undefined,
+  rotateWrapperTimer: undefined,
 
   _scalePath(path, step) {
+    if (this.props.mode !== 'indeterminate') return;
+
     step = step || 0;
     step %= 3;
-
-    setTimeout(this._scalePath.bind(this, path, step + 1), step ? 750 : 250);
-
-    if (!this.isMounted()) return;
-    if (this.props.mode !== 'indeterminate') return;
 
     if (step === 0) {
       path.style.strokeDasharray = '1, 200';
@@ -92,12 +139,11 @@ const CircularProgress = React.createClass({
       path.style.strokeDashoffset = -124;
       path.style.transitionDuration = '850ms';
     }
+
+    this.scalePathTimer = setTimeout(() => this._scalePath(path, step + 1), step ? 750 : 250);
   },
 
   _rotateWrapper(wrapper) {
-    setTimeout(this._rotateWrapper.bind(this, wrapper), 10050);
-
-    if (!this.isMounted()) return;
     if (this.props.mode !== 'indeterminate') return;
 
     AutoPrefix.set(wrapper.style, 'transform', 'rotate(0deg)');
@@ -108,16 +154,8 @@ const CircularProgress = React.createClass({
       AutoPrefix.set(wrapper.style, 'transitionDuration', '10s');
       AutoPrefix.set(wrapper.style, 'transitionTimingFunction', 'linear');
     }, 50);
-  },
 
-  getDefaultProps() {
-    return {
-      mode: 'indeterminate',
-      value: 0,
-      min: 0,
-      max: 100,
-      size: 1,
-    };
+    this.rotateWrapperTimer = setTimeout(() => this._rotateWrapper(wrapper), 10050);
   },
 
   getTheme() {
@@ -143,7 +181,6 @@ const CircularProgress = React.createClass({
       wrapper: {
         width: size,
         height: size,
-        margin: '5px',
         display: 'inline-block',
         transition: Transitions.create('transform', '20s', null, 'linear'),
       },

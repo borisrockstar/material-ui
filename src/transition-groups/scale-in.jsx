@@ -6,10 +6,20 @@ import ScaleInChild from './scale-in-child';
 import DefaultRawTheme from '../styles/raw-themes/light-raw-theme';
 import ThemeManager from '../styles/theme-manager';
 
-
 const ScaleIn = React.createClass({
 
-  mixins: [PureRenderMixin, StylePropable],
+  propTypes: {
+    childStyle: React.PropTypes.object,
+    children: React.PropTypes.node,
+    enterDelay: React.PropTypes.number,
+    maxScale: React.PropTypes.number,
+    minScale: React.PropTypes.number,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
@@ -20,9 +30,14 @@ const ScaleIn = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [
+    PureRenderMixin,
+    StylePropable,
+  ],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      enterDelay: 0,
     };
   },
 
@@ -32,26 +47,17 @@ const ScaleIn = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
-  },
-
-  propTypes: {
-    childStyle: React.PropTypes.object,
-    children: React.PropTypes.node,
-    enterDelay: React.PropTypes.number,
-    maxScale: React.PropTypes.number,
-    minScale: React.PropTypes.number,
-    style: React.PropTypes.object,
-  },
-
-  getDefaultProps() {
-    return {
-      enterDelay: 0,
-    };
   },
 
   render() {
@@ -65,7 +71,7 @@ const ScaleIn = React.createClass({
       ...other,
     } = this.props;
 
-    const mergedRootStyles = this.prepareStyles({
+    const mergedRootStyles = this.mergeStyles({
       position: 'relative',
       overflow: 'hidden',
       height: '100%',
@@ -87,7 +93,7 @@ const ScaleIn = React.createClass({
     return (
       <ReactTransitionGroup
         {...other}
-        style={mergedRootStyles}
+        style={this.prepareStyles(mergedRootStyles)}
         component="div">
         {newChildren}
       </ReactTransitionGroup>

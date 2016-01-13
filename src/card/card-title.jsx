@@ -6,9 +6,23 @@ import DefaultRawTheme from '../styles/raw-themes/light-raw-theme';
 
 const CardTitle = React.createClass({
 
-  mixins: [
-    StylePropable,
-  ],
+  propTypes: {
+    actAsExpander: React.PropTypes.bool,
+    children: React.PropTypes.node,
+    expandable: React.PropTypes.bool,
+    showExpandableButton: React.PropTypes.bool,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+    subtitle: React.PropTypes.node,
+    subtitleColor: React.PropTypes.string,
+    subtitleStyle: React.PropTypes.object,
+    title: React.PropTypes.node,
+    titleColor: React.PropTypes.string,
+    titleStyle: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
@@ -19,15 +33,26 @@ const CardTitle = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [
+    StylePropable,
+  ],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      titleColor: Styles.Colors.darkBlack,
+      subtitleColor: Styles.Colors.lightBlack,
     };
   },
 
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -38,27 +63,6 @@ const CardTitle = React.createClass({
     this.setState({
       muiTheme: newMuiTheme,
     });
-  },
-
-  propTypes: {
-    actAsExpander: React.PropTypes.bool,
-    children: React.PropTypes.node,
-    expandable: React.PropTypes.bool,
-    showExpandableButton: React.PropTypes.bool,
-    style: React.PropTypes.object,
-    subtitle: React.PropTypes.node,
-    subtitleColor: React.PropTypes.string,
-    subtitleStyle: React.PropTypes.object,
-    title: React.PropTypes.node,
-    titleColor: React.PropTypes.string,
-    titleStyle: React.PropTypes.object,
-  },
-
-  getDefaultProps() {
-    return {
-      titleColor: Styles.Colors.darkBlack,
-      subtitleColor: Styles.Colors.lightBlack,
-    };
   },
 
   getStyles() {
@@ -83,16 +87,16 @@ const CardTitle = React.createClass({
 
   render() {
     const styles = this.getStyles();
-    const rootStyle = this.prepareStyles(styles.root, this.props.style);
-    const titleStyle = this.prepareStyles(styles.title, this.props.titleStyle);
-    const subtitleStyle = this.prepareStyles(styles.subtitle, this.props.subtitleStyle);
+    const rootStyle = this.mergeStyles(styles.root, this.props.style);
+    const titleStyle = this.mergeStyles(styles.title, this.props.titleStyle);
+    const subtitleStyle = this.mergeStyles(styles.subtitle, this.props.subtitleStyle);
 
     return (
-      <div {...this.props} style={rootStyle}>
-        <span style={titleStyle}>
+      <div {...this.props} style={this.prepareStyles(rootStyle)}>
+        <span style={this.prepareStyles(titleStyle)}>
           {this.props.title}
         </span>
-        <span style={subtitleStyle}>
+        <span style={this.prepareStyles(subtitleStyle)}>
           {this.props.subtitle}
         </span>
         {this.props.children}

@@ -7,14 +7,6 @@ import ThemeManager from '../styles/theme-manager';
 
 const DateDisplay = React.createClass({
 
-  mixins: [
-    StylePropable,
-  ],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
     DateTimeFormat: React.PropTypes.func.isRequired,
     disableYearSelection: React.PropTypes.bool,
@@ -24,8 +16,16 @@ const DateDisplay = React.createClass({
     mode: React.PropTypes.oneOf(['portrait', 'landscape']),
     monthDaySelected: React.PropTypes.bool,
     selectedDate: React.PropTypes.object.isRequired,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
     weekCount: React.PropTypes.number,
+  },
+
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -33,11 +33,9 @@ const DateDisplay = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+  ],
 
   getDefaultProps() {
     return {
@@ -52,6 +50,12 @@ const DateDisplay = React.createClass({
       selectedYear: !this.props.monthDaySelected,
       transitionDirection: 'up',
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -129,6 +133,24 @@ const DateDisplay = React.createClass({
     return styles;
   },
 
+  _handleMonthDayClick() {
+    if (this.props.handleMonthDayClick && this.state.selectedYear) {
+      this.props.handleMonthDayClick();
+    }
+
+    this.setState({selectedYear: false});
+  },
+
+  _handleYearClick() {
+    if (this.props.handleYearClick && !this.props.disableYearSelection && !this.state.selectedYear) {
+      this.props.handleYearClick();
+    }
+
+    if (!this.props.disableYearSelection) {
+      this.setState({selectedYear: true});
+    }
+  },
+
   render() {
     let {
       DateTimeFormat,
@@ -147,43 +169,24 @@ const DateDisplay = React.createClass({
     }).format(this.props.selectedDate);
 
     return (
-    <div {...other} style={this.prepareStyles(styles.root, this.props.style)}>
+      <div {...other} style={this.prepareStyles(styles.root, this.props.style)}>
         <SlideInTransitionGroup
           style={styles.year.root}
           direction={this.state.transitionDirection}>
           <div key={year} style={styles.year.title} onTouchTap={this._handleYearClick}>{year}</div>
         </SlideInTransitionGroup>
-
         <SlideInTransitionGroup
           style={styles.monthDay.root}
           direction={this.state.transitionDirection}>
-            <div
-              key={dateTimeFormatted}
-              style={styles.monthDay.title}
-              onTouchTap={this._handleMonthDayClick}>
-                {dateTimeFormatted}
-            </div>
+          <div
+            key={dateTimeFormatted}
+            style={styles.monthDay.title}
+            onTouchTap={this._handleMonthDayClick}>
+              {dateTimeFormatted}
+          </div>
         </SlideInTransitionGroup>
       </div>
     );
-  },
-
-  _handleMonthDayClick() {
-    if (this.props.handleMonthDayClick && this.state.selectedYear) {
-      this.props.handleMonthDayClick();
-    }
-
-    this.setState({selectedYear: false});
-  },
-
-  _handleYearClick() {
-    if (this.props.handleYearClick && !this.props.disableYearSelection && !this.state.selectedYear) {
-      this.props.handleYearClick();
-    }
-
-    if (!this.props.disableYearSelection) {
-      this.setState({selectedYear: true});
-    }
   },
 
 });

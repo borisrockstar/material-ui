@@ -6,11 +6,15 @@ import warning from 'warning';
 const MenuDivider = React.createClass({
 
   propTypes: {
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
   },
 
   getInitialState() {
     warning(false, '<MenuDivider /> has been deprecated. Please use the <Divider /> component.');
+    return null;
   },
 
   getStyles() {

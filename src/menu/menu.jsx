@@ -19,12 +19,6 @@ import warning from 'warning';
 ***********************/
 const NestedMenuItem = React.createClass({
 
-  mixins: [ClickAwayable, StylePropable],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
     active: React.PropTypes.bool,
     disabled: React.PropTypes.bool,
@@ -39,10 +33,8 @@ const NestedMenuItem = React.createClass({
     zDepth: React.PropTypes.number,
   },
 
-  getDefaultProps() {
-    return {
-      disabled: false,
-    };
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -50,9 +42,11 @@ const NestedMenuItem = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [ClickAwayable, StylePropable],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      disabled: false,
     };
   },
 
@@ -64,8 +58,10 @@ const NestedMenuItem = React.createClass({
     };
   },
 
-  componentClickAway() {
-    this._closeNestedMenu();
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
   },
 
   componentDidMount() {
@@ -75,6 +71,10 @@ const NestedMenuItem = React.createClass({
 
   componentDidUpdate() {
     this._positionNestedMenu();
+  },
+
+  componentClickAway() {
+    this._closeNestedMenu();
   },
 
   getSpacing() {
@@ -118,54 +118,6 @@ const NestedMenuItem = React.createClass({
     return this.state.muiTheme.menuItem;
   },
 
-  render() {
-    let styles = this.getStyles();
-    styles = this.prepareStyles(styles.root,
-      (this.props.active && !this.props.disabled) && styles.rootWhenHovered, {
-        position: 'relative',
-      }, this.props.style);
-
-    let iconCustomArrowDropRight = {
-      marginRight: this.getSpacing().desktopGutterMini * -1,
-      color: this.state.muiTheme.dropDownMenu.accentColor,
-    };
-
-    let {
-      index,
-      menuItemStyle,
-      ...other,
-    } = this.props;
-
-    return (
-      <div
-        ref="root"
-        style={styles}
-        onMouseEnter={this._openNestedMenu}
-        onMouseLeave={this._closeNestedMenu}
-        onMouseOver={this._handleMouseOver}
-        onMouseOut={this._handleMouseOut}>
-        <MenuItem
-          index={index}
-          style={menuItemStyle}
-          disabled={this.props.disabled}
-          iconRightStyle={iconCustomArrowDropRight}
-          iconRightClassName="muidocs-icon-custom-arrow-drop-right"
-          onTouchTap={this._onParentItemTap}>
-            {this.props.text}
-        </MenuItem>
-        <Menu {...other}
-          ref="nestedMenu"
-          menuItems={this.props.menuItems}
-          menuItemStyle={menuItemStyle}
-          onItemTap={this._onMenuItemTap}
-          hideable={true}
-          visible={this.state.open}
-          onRequestClose={this._closeNestedMenu}
-          zDepth={this.props.zDepth + 1} />
-      </div>
-    );
-  },
-
   toggleNestedMenu() {
     if (!this.props.disabled) this.setState({open: !this.state.open});
   },
@@ -205,6 +157,54 @@ const NestedMenuItem = React.createClass({
     if (!this.props.disabled && this.props.onMouseOut) this.props.onMouseOut(e, this.props.index);
   },
 
+  render() {
+    let styles = this.getStyles();
+    styles = this.mergeStyles(styles.root,
+      (this.props.active && !this.props.disabled) && styles.rootWhenHovered, {
+        position: 'relative',
+      }, this.props.style);
+
+    let iconCustomArrowDropRight = {
+      marginRight: this.getSpacing().desktopGutterMini * -1,
+      color: this.state.muiTheme.dropDownMenu.accentColor,
+    };
+
+    let {
+      index,
+      menuItemStyle,
+      ...other,
+    } = this.props;
+
+    return (
+      <div
+        ref="root"
+        style={this.prepareStyles(styles)}
+        onMouseEnter={this._openNestedMenu}
+        onMouseLeave={this._closeNestedMenu}
+        onMouseOver={this._handleMouseOver}
+        onMouseOut={this._handleMouseOut}>
+        <MenuItem
+          index={index}
+          style={menuItemStyle}
+          disabled={this.props.disabled}
+          iconRightStyle={iconCustomArrowDropRight}
+          iconRightClassName="muidocs-icon-custom-arrow-drop-right"
+          onTouchTap={this._onParentItemTap}>
+            {this.props.text}
+        </MenuItem>
+        <Menu {...other}
+          ref="nestedMenu"
+          menuItems={this.props.menuItems}
+          menuItemStyle={menuItemStyle}
+          onItemTap={this._onMenuItemTap}
+          hideable={true}
+          visible={this.state.open}
+          onRequestClose={this._closeNestedMenu}
+          zDepth={this.props.zDepth + 1} />
+      </div>
+    );
+  },
+
 });
 
 
@@ -212,12 +212,6 @@ const NestedMenuItem = React.createClass({
 * Menu Component
 ****************/
 const Menu = React.createClass({
-
-  mixins: [StylePropable],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
 
   propTypes: {
     autoWidth: React.PropTypes.bool,
@@ -239,14 +233,24 @@ const Menu = React.createClass({
     zDepth: React.PropTypes.number,
   },
 
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
   //for passing default theme context to children
   childContextTypes: {
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [StylePropable],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      autoWidth: true,
+      hideable: false,
+      visible: true,
+      zDepth: 1,
+      onRequestClose: () => {},
     };
   },
 
@@ -260,13 +264,9 @@ const Menu = React.createClass({
     };
   },
 
-  getDefaultProps() {
+  getChildContext() {
     return {
-      autoWidth: true,
-      hideable: false,
-      visible: true,
-      zDepth: 1,
-      onRequestClose: () => {},
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -280,12 +280,6 @@ const Menu = React.createClass({
     this._renderVisibility();
   },
 
-  componentDidUpdate(prevProps) {
-    if (this.props.visible !== prevProps.visible || this.props.menuItems.length !== prevProps.menuItems.length) {
-      this._renderVisibility();
-    }
-  },
-
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
@@ -294,6 +288,12 @@ const Menu = React.createClass({
 
     //Set the menu width
     this._setKeyWidth(ReactDOM.findDOMNode(this));
+  },
+
+  componentDidUpdate(prevProps) {
+    if (this.props.visible !== prevProps.visible || this.props.menuItems.length !== prevProps.menuItems.length) {
+      this._renderVisibility();
+    }
   },
 
   getTheme() {
@@ -311,7 +311,7 @@ const Menu = React.createClass({
         paddingTop: this.getSpacing().desktopGutterMini,
         paddingBottom: this.getSpacing().desktopGutterMini,
         transition: Transitions.easeOut(null, 'height'),
-        outline:'none !important',
+        outline: 'none !important',
       },
       subheader: {
         paddingLeft: this.state.muiTheme.menuSubheader.padding,
@@ -331,27 +331,11 @@ const Menu = React.createClass({
     return styles;
   },
 
-  render() {
-    let styles = this.getStyles();
-    return (
-      <Paper
-        ref="paperContainer"
-        tabIndex="0"
-        onKeyDown={this._onKeyDown}
-        zDepth={this.props.zDepth}
-        style={this.mergeStyles(
-          styles.root,
-          this.props.hideable && styles.hideable,
-          this.props.style)}>
-        {this._getChildren()}
-      </Paper>
-    );
-  },
 
   _getChildren() {
-    let menuItem,
-      itemComponent,
-      isDisabled;
+    let menuItem;
+    let itemComponent;
+    let isDisabled;
 
     let styles = this.getStyles();
 
@@ -625,13 +609,13 @@ const Menu = React.createClass({
   _activatePreviousItem() {
     let active = this.state.activeIndex || 0;
     active = Math.max(active - 1, 0);
-    this.setState({activeIndex:active});
+    this.setState({activeIndex: active});
   },
 
   _activateNextItem() {
     let active = this.state.activeIndex || 0;
     active = Math.min(active + 1, this._children.length - 1);
-    this.setState({activeIndex:active});
+    this.setState({activeIndex: active});
   },
 
   _triggerSelection(e) {
@@ -647,6 +631,23 @@ const Menu = React.createClass({
     let item = this.refs[index];
     if (item && item.toggleNestedMenu)
       item.toggleNestedMenu();
+  },
+
+  render() {
+    let styles = this.getStyles();
+    return (
+      <Paper
+        ref="paperContainer"
+        tabIndex="0"
+        onKeyDown={this._onKeyDown}
+        zDepth={this.props.zDepth}
+        style={this.mergeStyles(
+          styles.root,
+          this.props.hideable && styles.hideable,
+          this.props.style)}>
+        {this._getChildren()}
+      </Paper>
+    );
   },
 
 });

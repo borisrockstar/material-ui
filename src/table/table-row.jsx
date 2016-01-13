@@ -5,39 +5,98 @@ import ThemeManager from '../styles/theme-manager';
 
 const TableRow = React.createClass({
 
-  mixins: [StylePropable],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
+    /**
+     * Children passed to table row.
+     */
     children: React.PropTypes.node,
+
+    /**
+     * The css class name of the root element.
+     */
     className: React.PropTypes.string,
+
+    /**
+     * If true, row border will be displayed for the row.
+     * If false, no border will be drawn.
+     */
     displayBorder: React.PropTypes.bool,
+
+    /**
+     * Controls whether or not the row reponseds to hover events.
+     */
     hoverable: React.PropTypes.bool,
+
+    /**
+     * Called when a row cell is clicked.
+     * rowNumber is the row number and columnId is
+     * the column number or the column key.
+     */
     onCellClick: React.PropTypes.func,
+
+    /**
+     * Called when a table cell is hovered.
+     * rowNumber is the row number of the hovered row
+     * and columnId is the column number or the column key of the cell.
+     */
     onCellHover: React.PropTypes.func,
+
+    /**
+     * Called when a table cell is no longer hovered.
+     * rowNumber is the row number of the row and columnId
+     * is the column number or the column key of the cell.
+     */
     onCellHoverExit: React.PropTypes.func,
+
+    /**
+     * Called when row is clicked.
+     */
     onRowClick: React.PropTypes.func,
+
+    /**
+     * Called when a table row is hovered.
+     * rowNumber is the row number of the hovered row.
+     */
     onRowHover: React.PropTypes.func,
+
+    /**
+     * Called when a table row is no longer hovered.
+     * rowNumber is the row number of the row that is no longer hovered.
+     */
     onRowHoverExit: React.PropTypes.func,
+
+    /**
+     * Number to identify the row. This property is
+     * automatically populated when used with the TableBody component.
+     */
     rowNumber: React.PropTypes.number,
+
+    /**
+     * If true, table rows can be selected. If multiple row
+     * selection is desired, enable multiSelectable.
+     * The default value is true.
+     */
     selectable: React.PropTypes.bool,
+
+    /**
+     * Indicates that a particular row is selected.
+     * This property can be used to programmatically select rows.
+     */
     selected: React.PropTypes.bool,
+
+    /**
+     * Indicates whether or not the row is striped.
+     */
     striped: React.PropTypes.bool,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
   },
 
-  getDefaultProps() {
-    return {
-      displayBorder: true,
-      displayRowCheckbox: true,
-      hoverable: false,
-      selectable: true,
-      selected: false,
-      striped: false,
-    };
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -45,9 +104,17 @@ const TableRow = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [
+    StylePropable,
+  ],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      displayBorder: true,
+      hoverable: false,
+      selectable: true,
+      selected: false,
+      striped: false,
     };
   },
 
@@ -55,6 +122,12 @@ const TableRow = React.createClass({
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
       hovered: false,
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -84,8 +157,9 @@ const TableRow = React.createClass({
 
     let styles = {
       root: {
-        borderBottom: '1px solid ' + this.getTheme().borderColor,
-        color: this.getTheme().textColor,
+        borderBottom: '1px solid ' + theme.borderColor,
+        color: theme.textColor,
+        height: theme.height,
       },
       cell: {
         backgroundColor: cellBgColor,
@@ -97,38 +171,6 @@ const TableRow = React.createClass({
     }
 
     return styles;
-  },
-
-  render() {
-    let {
-      className,
-      displayBorder,
-      hoverable,
-      onCellClick,
-      onCellHover,
-      onCellHoverExit,
-      onRowClick,
-      onRowHover,
-      onRowHoverExit,
-      rowNumber,
-      selectable,
-      selected,
-      striped,
-      style,
-      ...other,
-    } = this.props;
-    let classes = 'mui-table-row';
-    if (className) classes += ' ' + className;
-    let rowColumns = this._createColumns();
-
-    return (
-      <tr
-        className={classes}
-        style={this.prepareStyles(this.getStyles().root, style)}
-        {...other}>
-        {rowColumns}
-      </tr>
-    );
   },
 
   _createColumns() {
@@ -155,7 +197,7 @@ const TableRow = React.createClass({
         columnNumber: columnNumber,
         hoverable: this.props.hoverable,
         key: child.props.key || key,
-        style: this.mergeAndPrefix(styles.cell, child.props.style),
+        style: this.mergeStyles(styles.cell, child.props.style),
         ...handlers,
       }
     );
@@ -195,6 +237,35 @@ const TableRow = React.createClass({
     }
   },
 
+  render() {
+    let {
+      className,
+      displayBorder,
+      hoverable,
+      onCellClick,
+      onCellHover,
+      onCellHoverExit,
+      onRowClick,
+      onRowHover,
+      onRowHoverExit,
+      rowNumber,
+      selectable,
+      selected,
+      striped,
+      style,
+      ...other,
+    } = this.props;
+    let rowColumns = this._createColumns();
+
+    return (
+      <tr
+        className={className}
+        style={this.prepareStyles(this.getStyles().root, style)}
+        {...other}>
+        {rowColumns}
+      </tr>
+    );
+  },
 });
 
 export default TableRow;

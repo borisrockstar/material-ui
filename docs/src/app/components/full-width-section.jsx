@@ -3,10 +3,7 @@ import {ClearFix, Mixins, Styles} from 'material-ui';
 let {StylePropable, StyleResizable} = Mixins;
 let DesktopGutter = Styles.Spacing.desktopGutter;
 
-
-let FullWidthSection = React.createClass({
-
-  mixins: [StylePropable, StyleResizable],
+const FullWidthSection = React.createClass({
 
   propTypes: {
     children: React.PropTypes.node,
@@ -15,6 +12,11 @@ let FullWidthSection = React.createClass({
     style: React.PropTypes.object,
     useContent: React.PropTypes.bool,
   },
+
+  mixins: [
+    StylePropable,
+    StyleResizable,
+  ],
 
   getDefaultProps() {
     return {
@@ -34,12 +36,12 @@ let FullWidthSection = React.createClass({
         margin: '0 auto',
       },
       rootWhenSmall: {
-        paddingTop: (DesktopGutter * 2) + 'px',
-        paddingBottom: (DesktopGutter * 2) + 'px',
+        paddingTop: DesktopGutter * 2,
+        paddingBottom: DesktopGutter * 2,
       },
       rootWhenLarge: {
-        paddingTop: (DesktopGutter * 3) + 'px',
-        paddingBottom: (DesktopGutter * 3) + 'px',
+        paddingTop: DesktopGutter * 3,
+        paddingBottom: DesktopGutter * 3,
       },
     };
   },
@@ -60,7 +62,7 @@ let FullWidthSection = React.createClass({
       content =
         React.createElement(
           contentType,
-          {style: this.mergeAndPrefix(styles.content, contentStyle)},
+          {style: this.mergeStyles(styles.content, contentStyle)},
           this.props.children
         );
     } else {
@@ -69,7 +71,7 @@ let FullWidthSection = React.createClass({
 
     return (
       <ClearFix {...other}
-        style={this.mergeAndPrefix(
+        style={this.mergeStyles(
           styles.root,
           style,
           this.isDeviceSize(StyleResizable.statics.Sizes.SMALL) && styles.rootWhenSmall,

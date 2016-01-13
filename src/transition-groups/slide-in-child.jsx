@@ -9,7 +9,19 @@ import ThemeManager from '../styles/theme-manager';
 
 const SlideInChild = React.createClass({
 
-  mixins: [StylePropable],
+  propTypes: {
+    children: React.PropTypes.node,
+    direction: React.PropTypes.string,
+    enterDelay: React.PropTypes.number,
+    //This callback is needed bacause
+    //the direction could change when leaving the dom
+    getLeaveDirection: React.PropTypes.func.isRequired,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
@@ -20,9 +32,11 @@ const SlideInChild = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [StylePropable],
+
+  getDefaultProps: function() {
     return {
-      muiTheme: this.state.muiTheme,
+      enterDelay: 0,
     };
   },
 
@@ -32,27 +46,17 @@ const SlideInChild = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
-  },
-
-  propTypes: {
-    children: React.PropTypes.node,
-    direction: React.PropTypes.string,
-    enterDelay: React.PropTypes.number,
-    //This callback is needed bacause
-    //the direction could change when leaving the dom
-    getLeaveDirection: React.PropTypes.func.isRequired,
-    style: React.PropTypes.object,
-  },
-
-  getDefaultProps: function() {
-    return {
-      enterDelay: 0,
-    };
   },
 
   componentWillEnter(callback) {
@@ -101,7 +105,7 @@ const SlideInChild = React.createClass({
       ...other,
     } = this.props;
 
-    let mergedRootStyles = this.prepareStyles({
+    let mergedRootStyles = this.mergeStyles({
       position: 'absolute',
       height: '100%',
       width: '100%',
@@ -111,7 +115,7 @@ const SlideInChild = React.createClass({
     }, style);
 
     return (
-      <div {...other} style={mergedRootStyles}>
+      <div {...other} style={this.prepareStyles(mergedRootStyles)}>
         {children}
       </div>
     );

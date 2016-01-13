@@ -1,7 +1,7 @@
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
-import React from 'react/addons';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import Calendar from 'date-picker/calendar';
 import CalendarToolbar from 'date-picker/calendar-toolbar';
@@ -23,12 +23,12 @@ describe(`Calendar`, () => {
       let maxDate = new Date(initialDate.toDateString());
 
       let render = TestUtils.renderIntoDocument(
-          <ThemedCalendar
-            initialDate={initialDate}
-            DateTimeFormat={DateTime.DateTimeFormat}
-            locale="en-US"
-            maxDate={maxDate}
-          />
+        <ThemedCalendar
+          initialDate={initialDate}
+          DateTimeFormat={DateTime.DateTimeFormat}
+          locale="en-US"
+          maxDate={maxDate}
+        />
       );
       let renderedCalendarToolbar =
                 TestUtils.findRenderedComponentWithType(render, CalendarToolbar);

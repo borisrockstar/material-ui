@@ -1,15 +1,15 @@
 //NOTE: all these tests depend on ThemeManager, DarkRawTheme, and Colors
 //Modifying any of the above files will break these tests!
 
-const AppBar = require('app-bar');
-const RaisedButton = require('raised-button');
-const React = require('react');
-const TestUtils = require('react-addons-test-utils');
-const ThemeManager = require('styles/theme-manager');
-const ThemeDecorator = require('styles/theme-decorator');
-const DarkRawTheme = require('styles/raw-themes/dark-raw-theme');
-const LightRawTheme = require('styles/raw-themes/light-raw-theme');
-const Colors = require('styles/colors');
+import AppBar from 'app-bar';
+import RaisedButton from 'raised-button';
+import React from 'react';
+import TestUtils from 'react-addons-test-utils';
+import ThemeManager from 'styles/theme-manager';
+import ThemeDecorator from 'styles/theme-decorator';
+import DarkRawTheme from 'styles/raw-themes/dark-raw-theme';
+import LightRawTheme from 'styles/raw-themes/light-raw-theme';
+import Colors from 'styles/colors';
 
 describe('Theming', () => {
   describe('ThemeManager', () => {
@@ -126,7 +126,7 @@ describe('Theming', () => {
 const AppBarDarkUsingContext = React.createClass({
 
   childContextTypes: {
-    muiTheme:React.PropTypes.object,
+    muiTheme: React.PropTypes.object,
   },
 
   getChildContext() {
@@ -143,7 +143,7 @@ const AppBarDarkUsingContext = React.createClass({
 const AppBarDarkUsingContextWithOverride = React.createClass({
 
   childContextTypes: {
-    muiTheme:React.PropTypes.object,
+    muiTheme: React.PropTypes.object,
   },
 
   getInitialState() {
@@ -190,14 +190,15 @@ class AppBarDarkUsingDecoratorWithOverride extends React.Component
 
 //react component used to test whether or not theme updates down the hierarchy
 const ButtonToUpdateThemeWithAppBar = React.createClass({
+
+  childContextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
   getInitialState() {
     return {
       muiTheme: ThemeManager.getMuiTheme(DarkRawTheme),
     };
-  },
-
-  childContextTypes: {
-    muiTheme: React.PropTypes.object,
   },
 
   getChildContext() {

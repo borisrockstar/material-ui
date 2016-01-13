@@ -6,29 +6,76 @@ import ThemeManager from '../styles/theme-manager';
 
 const GridTile = React.createClass({
 
-  mixins: [
-    StylePropable,
-  ],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
+    /**
+     * An IconButton element to be used as secondary action target
+     * (primary action target is the tile itself).
+     */
     actionIcon: React.PropTypes.element,
+
+    /**
+     * Position of secondary action IconButton.
+     */
     actionPosition: React.PropTypes.oneOf(['left', 'right']),
+
+    /**
+     * Theoretically you can pass any node as children, but the main use case is to pass an img,
+     * in whichcase GridTile takes care of making the image "cover" available space
+     * (similar to background-size: cover or to object-fit:cover).
+     */
     children: React.PropTypes.node,
+
+    /**
+     * Width of the tile in number of grid cells.
+     */
     cols: React.PropTypes.number,
+
+    /**
+     * Either a string used as tag name for the tile root element, or a ReactComponent.
+     * This is useful when you have, for example, a custom implementation of
+     * a navigation link (that knowsabout your routes) and you want to use it as primary tile action.
+     * In case you pass a ReactComponent, please make sure that it passes all props,
+     * accepts styles overrides and render it's children.
+     */
     rootClass: React.PropTypes.oneOfType([
       React.PropTypes.string,
       React.PropTypes.object,
     ]),
+
+    /**
+     * Height of the tile in number of grid cells.
+     */
     rows: React.PropTypes.number,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
+
+    /**
+     * String or element serving as subtitle (support text).
+     */
     subtitle: React.PropTypes.node,
+
+    /**
+     * Title to be displayed on tile.
+     */
     title: React.PropTypes.node,
+
+    /**
+     * Style used for title bar background.
+     * Useful for setting custom gradients for example
+     */
     titleBackground: React.PropTypes.string,
+
+    /**
+     * Position of the title bar (container of title, subtitle and action icon).
+     */
     titlePosition: React.PropTypes.oneOf(['top', 'bottom']),
+  },
+
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -36,11 +83,9 @@ const GridTile = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+  ],
 
   getDefaultProps() {
     return {
@@ -59,6 +104,16 @@ const GridTile = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
+  componentDidMount() {
+    this._ensureImageCover();
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
@@ -66,8 +121,7 @@ const GridTile = React.createClass({
     this.setState({muiTheme: newMuiTheme});
   },
 
-  getStyles()
-  {
+  getStyles() {
     const spacing = this.state.muiTheme.rawTheme.spacing;
     const themeVariables = this.state.muiTheme.gridTile;
     const actionPos = this.props.actionIcon ? this.props.actionPosition : null;
@@ -122,10 +176,6 @@ const GridTile = React.createClass({
     return styles;
   },
 
-  componentDidMount() {
-    this._ensureImageCover();
-  },
-
   componeneDidUpdate() {
     this._ensureImageCover();
   },
@@ -170,7 +220,7 @@ const GridTile = React.createClass({
 
     const styles = this.getStyles();
 
-    const mergedRootStyles = this.prepareStyles(styles.root, style);
+    const mergedRootStyles = this.mergeStyles(styles.root, style);
 
     let titleBar = null;
 
@@ -209,7 +259,7 @@ const GridTile = React.createClass({
 
     const RootTag = rootClass;
     return (
-      <RootTag style={mergedRootStyles} {...other}>
+      <RootTag style={this.prepareStyles(mergedRootStyles)} {...other}>
         {newChildren}
         {titleBar}
       </RootTag>

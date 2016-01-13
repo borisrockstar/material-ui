@@ -9,38 +9,19 @@ import ThemeManager from '../styles/theme-manager';
 import ContextPure from '../mixins/context-pure';
 
 const CardExpandable = React.createClass({
-  mixins: [
-    StylePropable,
-    ContextPure,
-  ],
-
-  getStyles() {
-    const contextKeys = this.constructor.getRelevantContextKeys(this.state.muiTheme);
-
-    const directionStyle = contextKeys.isRtl ? {
-      left: 4,
-    } : {
-      right: 4,
-    };
-
-    return {
-      root: Extend({
-        top: 0,
-        bottom: 0,
-        margin: 'auto',
-        position: 'absolute',
-      }, directionStyle),
-    };
-  },
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
 
   propTypes: {
     expanded: React.PropTypes.bool,
     onExpanding: React.PropTypes.func.isRequired,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
+  },
+
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -48,11 +29,10 @@ const CardExpandable = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+    ContextPure,
+  ],
 
   statics: {
     getRelevantContextKeys(muiTheme) {
@@ -73,11 +53,36 @@ const CardExpandable = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
+  },
+
+  getStyles() {
+    const contextKeys = this.constructor.getRelevantContextKeys(this.state.muiTheme);
+
+    const directionStyle = contextKeys.isRtl ? {
+      left: 4,
+    } : {
+      right: 4,
+    };
+
+    return {
+      root: Extend({
+        top: 0,
+        bottom: 0,
+        margin: 'auto',
+        position: 'absolute',
+      }, directionStyle),
+    };
   },
 
   render() {

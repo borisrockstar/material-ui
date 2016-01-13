@@ -1,23 +1,27 @@
 import React from 'react';
-import {ClearFix, Mixins, Styles, Utils} from 'material-ui';
+import {
+  ClearFix,
+  Mixins,
+  Styles,
+  Utils,
+} from 'material-ui';
 
 const {ColorManipulator} = Utils;
 const {StyleResizable, StylePropable} = Mixins;
 const {Colors, Typography} = Styles;
 
-
 const ColorsPage = React.createClass({
 
-  mixins: [StyleResizable, StylePropable],
+  mixins: [
+    StyleResizable,
+    StylePropable,
+  ],
 
   getStyles() {
     let styles = {
-      root: {
-        //null
-      },
       name: {
         display: 'block',
-        marginBottom: '60px',
+        marginBottom: 60,
       },
       hex: {
         float: 'right',
@@ -26,14 +30,13 @@ const ColorsPage = React.createClass({
         float: 'left',
         padding: '16px 0',
         display: 'block',
-        margin: '0',
+        margin: 0,
       },
       headline: {
-        //mui-font-style-headline
-        fontSize: '24px',
+        fontSize: 24,
         lineHeight: '32px',
-        paddingTop: '16px',
-        marginBottom: '12px',
+        paddingTop: 16,
+        marginBottom: 12,
         letterSpacing: '0',
         fontWeight: Typography.fontWeightNormal,
         color: Typography.textDarkBlack,
@@ -58,46 +61,6 @@ const ColorsPage = React.createClass({
     }
 
     return styles;
-  },
-
-  render() {
-    let mainColors = [
-        'Red', 'Pink', 'Purple', 'Deep Purple', 'Indigo', 'Blue', 'Light Blue',
-        'Cyan', 'Teal', 'Green', 'Light Green', 'Lime', 'Yellow', 'Amber', 'Orange', 'Deep Orange',
-      ],
-      neutralColors = ['Brown', 'Blue Grey', 'Grey'],
-      colorGroups = [],
-      neutralGroups = [];
-
-    mainColors.forEach((color) => {
-      colorGroups.push(this._getColorGroup(color, true));
-    }, this);
-
-    neutralColors.forEach((color) => {
-      neutralGroups.push(this._getColorGroup(color, false));
-    }, this);
-
-    let googleLink = 'https://www.google.com/design/spec/style/color.html#color-ui-color-palette';
-    let githubLink = 'https://github.com/callemall/material-ui/blob/master/src/styles/colors.js';
-
-    return (
-      <div>
-        <h2 style={this.getStyles().headline}>UI Color Palette</h2>
-        <p>
-          We&#39;ve created javascript variables for every color used in
-          the <a href={googleLink}>UI Color Palette</a>. They are stored
-          in <a href={githubLink}>styles/colors.js</a>.
-        </p>
-
-        <ClearFix>
-          {colorGroups}
-
-          <div>
-            {neutralGroups}
-          </div>
-        </ClearFix>
-      </div>
-    );
   },
 
   _getColorGroup(color, showAltPalette) {
@@ -139,7 +102,7 @@ const ColorsPage = React.createClass({
       backgroundColor: bgColor,
       color: fgColor,
       listStyle: 'none',
-      padding: '15px',
+      padding: 15,
     };
 
     return (
@@ -147,6 +110,46 @@ const ColorsPage = React.createClass({
         {blockTitle}
         {bgColorText}
       </li>
+    );
+  },
+
+  render() {
+    let mainColors = [
+      'Red', 'Pink', 'Purple', 'Deep Purple', 'Indigo', 'Blue', 'Light Blue',
+      'Cyan', 'Teal', 'Green', 'Light Green', 'Lime', 'Yellow', 'Amber', 'Orange', 'Deep Orange',
+    ];
+    let neutralColors = ['Brown', 'Blue Grey', 'Grey'];
+    let colorGroups = [];
+    let neutralGroups = [];
+
+    mainColors.forEach((color) => {
+      colorGroups.push(this._getColorGroup(color, true));
+    }, this);
+
+    neutralColors.forEach((color) => {
+      neutralGroups.push(this._getColorGroup(color, false));
+    }, this);
+
+    let googleLink = 'https://www.google.com/design/spec/style/color.html#color-ui-color-palette';
+    let githubLink = 'https://github.com/callemall/material-ui/blob/master/src/styles/colors.js';
+
+    return (
+      <div>
+        <h2 style={this.getStyles().headline}>UI Color Palette</h2>
+        <p>
+          We&#39;ve created javascript variables for every color used in
+          the <a href={googleLink}>UI Color Palette</a>. They are stored
+          in <a href={githubLink}>styles/colors.js</a>.
+        </p>
+
+        <ClearFix>
+          {colorGroups}
+
+          <div>
+            {neutralGroups}
+          </div>
+        </ClearFix>
+      </div>
     );
   },
 

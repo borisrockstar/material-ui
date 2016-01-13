@@ -16,34 +16,86 @@ const nestedMenuStyle = {
 
 const MenuItem = React.createClass({
 
-  mixins: [
-    PureRenderMixin,
-    StylePropable,
-  ],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
+    /**
+     * If true, a left check mark will be rendered.
+     */
     checked: React.PropTypes.bool,
+
+    /**
+     * Elements passed as children to inner ListItem.
+     */
     children: React.PropTypes.node,
+
+    /**
+     * Indicates if the menu should render with compact desktop styles.
+     */
     desktop: React.PropTypes.bool,
+
+    /**
+     * Disables a menu item.
+     */
     disabled: React.PropTypes.bool,
+
+    /**
+     * Prop passed down to ListItem that tells it what kind of focus it has.
+     */
     focusState: React.PropTypes.oneOf([
       'none',
       'focused',
       'keyboard-focused',
     ]),
+
+    /**
+     * Style overrides for the inner div.
+     */
     innerDivStyle: React.PropTypes.object,
+
+    /**
+     * If true, the children will be indented.
+     * Only needed when there is no leftIcon.
+     */
     insetChildren: React.PropTypes.bool,
+
+    /**
+     * This is the SvgIcon or FontIcon to be displayed on the left side.
+     */
     leftIcon: React.PropTypes.element,
+
+    /**
+     * Nested MenuItems for this MenuItem. Used to make nested menus.
+     */
     menuItems: React.PropTypes.node,
+
+    /**
+     * Fired when the element is touchTapped.
+     */
     onTouchTap: React.PropTypes.func,
+
+    /**
+     * This is the SvgIcon or FontIcon to be displayed on the right side.
+     */
     rightIcon: React.PropTypes.element,
+
+    /**
+     * This is the block element that contains the secondary text.
+     * If a string is passed in, a div tag will be rendered.
+     */
     secondaryText: React.PropTypes.node,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
+
+    /**
+     * The value of the menu item.
+     */
     value: React.PropTypes.any,
+  },
+
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -51,9 +103,18 @@ const MenuItem = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [
+    PureRenderMixin,
+    StylePropable,
+  ],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      checked: false,
+      desktop: false,
+      disabled: false,
+      focusState: 'none',
+      insetChildren: false,
     };
   },
 
@@ -62,6 +123,16 @@ const MenuItem = React.createClass({
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
       open: false,
     };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
+  componentDidMount() {
+    this._applyFocusState();
   },
 
   //to update theme inside state whenever a new theme is passed down
@@ -75,16 +146,6 @@ const MenuItem = React.createClass({
     }
   },
 
-  getDefaultProps() {
-    return {
-      focusState: 'none',
-    };
-  },
-
-  componentDidMount() {
-    this._applyFocusState();
-  },
-
   componentDidUpdate() {
     this._applyFocusState();
   },
@@ -95,6 +156,46 @@ const MenuItem = React.createClass({
         open: false,
       });
     }
+  },
+
+  _applyFocusState() {
+    this.refs.listItem.applyFocusState(this.props.focusState);
+  },
+
+  _cloneMenuItem(item) {
+    return React.cloneElement(item, {
+      onTouchTap: (event) =>
+      {
+        if (!item.props.menuItems) {
+          this._onRequestClose();
+        }
+
+        if (item.props.onTouchTap) {
+          item.props.onTouchTap(event);
+        }
+      },
+      onRequestClose: this._onRequestClose,
+    });
+  },
+
+  _onTouchTap(event) {
+    event.preventDefault();
+
+    this.setState({
+      open: true,
+      anchorEl: ReactDOM.findDOMNode(this),
+    });
+
+    if (this.props.onTouchTap) {
+      this.props.onTouchTap(event);
+    }
+  },
+
+  _onRequestClose() {
+    this.setState({
+      open: false,
+      anchorEl: null,
+    });
   },
 
   render() {
@@ -140,13 +241,13 @@ const MenuItem = React.createClass({
       },
 
       leftIconDesktop: {
-        padding: 0,
+        margin: 0,
         left: 24,
         top: 4,
       },
 
       rightIconDesktop: {
-        padding: 0,
+        margin: 0,
         right: 24,
         top: 4,
         fill: Colors.grey600,
@@ -167,7 +268,7 @@ const MenuItem = React.createClass({
     let rightIconElement;
     if (rightIcon) {
       const mergedRightIconStyles = desktop ?
-        this.mergeStyles(styles.rightIconDesktop, rightIcon.props.style) : null;
+        this.mergeStyles(styles.rightIconDesktop, rightIcon.props.style) : rightIcon.props.style;
       rightIconElement = React.cloneElement(rightIcon, {style: mergedRightIconStyles});
     }
 
@@ -216,45 +317,6 @@ const MenuItem = React.createClass({
     );
   },
 
-  _applyFocusState() {
-    this.refs.listItem.applyFocusState(this.props.focusState);
-  },
-
-  _cloneMenuItem(item) {
-    return React.cloneElement(item, {
-      onTouchTap: (event) =>
-      {
-        if (!item.props.menuItems) {
-          this._onRequestClose();
-        }
-
-        if (item.props.onTouchTap) {
-          item.props.onTouchTap(event);
-        }
-      },
-      onRequestClose: this._onRequestClose,
-    });
-  },
-
-  _onTouchTap(event) {
-    event.preventDefault();
-
-    this.setState({
-      open: true,
-      anchorEl: ReactDOM.findDOMNode(this),
-    });
-
-    if (this.props.onTouchTap) {
-      this.props.onTouchTap(event);
-    }
-  },
-
-  _onRequestClose() {
-    this.setState({
-      open: false,
-      anchorEl: null,
-    });
-  },
 });
 
 export default MenuItem;

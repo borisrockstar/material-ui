@@ -6,15 +6,37 @@ import DefaultRawTheme from './styles/raw-themes/light-raw-theme';
 import ThemeManager from './styles/theme-manager';
 
 const LinearProgress = React.createClass({
-
-  mixins: [StylePropable],
-
   propTypes: {
+    /**
+     * The mode of show your progress, indeterminate for
+     * when there is no value for progress.
+     */
     color: React.PropTypes.string,
+
+    /**
+     * The max value of progress, only works in determinate mode.
+     */
     max: React.PropTypes.number,
+
+    /**
+     * The min value of progress, only works in determinate mode.
+     */
     min: React.PropTypes.number,
+
+    /**
+     * The mode of show your progress, indeterminate for when
+     * there is no value for progress.
+     */
     mode: React.PropTypes.oneOf(['determinate', 'indeterminate']),
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
+
+    /**
+     * The value of progress, only works in determinate mode.
+     */
     value: React.PropTypes.number,
   },
 
@@ -27,9 +49,16 @@ const LinearProgress = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [
+    StylePropable,
+  ],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      mode: 'indeterminate',
+      value: 0,
+      min: 0,
+      max: 100,
     };
   },
 
@@ -39,6 +68,29 @@ const LinearProgress = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
+  componentDidMount() {
+    let bar1 = ReactDOM.findDOMNode(this.refs.bar1);
+    let bar2 = ReactDOM.findDOMNode(this.refs.bar2);
+
+    this.timers.bar1 = this._barUpdate('bar1', 0, bar1, [
+      [-35, 100],
+      [100, -90],
+    ]);
+
+    this.timers.bar2 = setTimeout(() => {
+      this._barUpdate('bar2', 0, bar2, [
+        [-200, 100],
+        [107, -8],
+      ]);
+    }, 850);
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
@@ -46,40 +98,21 @@ const LinearProgress = React.createClass({
     this.setState({muiTheme: newMuiTheme});
   },
 
-  _getRelativeValue() {
-    let value = this.props.value;
-    let min = this.props.min;
-    let max = this.props.max;
-
-    let clampedValue = Math.min(Math.max(min, value), max);
-    let rangeValue = max - min;
-    let relValue = Math.round(clampedValue / rangeValue * 10000) / 10000;
-    return relValue * 100;
+  componentWillUnmount() {
+    clearTimeout(this.timers.bar1);
+    clearTimeout(this.timers.bar2);
   },
 
-  componentDidMount() {
-    let bar1 = ReactDOM.findDOMNode(this.refs.bar1);
-    let bar2 = ReactDOM.findDOMNode(this.refs.bar2);
-
-    this._barUpdate(0, bar1, [
-      [-35, 100],
-      [100, -90],
-    ]);
-
-    setTimeout(() => {
-      this._barUpdate(0, bar2, [
-        [-200, 100],
-        [107, -8],
-      ]);
-    }, 850);
+  timers: {
+    bar1: undefined,
+    bar2: undefined,
   },
 
-  _barUpdate(step, barElement, stepValues) {
+  _barUpdate(id, step, barElement, stepValues) {
+    if (this.props.mode !== 'indeterminate') return;
+
     step = step || 0;
     step %= 4;
-    setTimeout(this._barUpdate.bind(this, step + 1, barElement, stepValues), 420);
-    if (!this.isMounted()) return;
-    if (this.props.mode !== 'indeterminate') return;
 
     const right = this.state.muiTheme.isRtl ? 'left' : 'right';
     const left = this.state.muiTheme.isRtl ? 'right' : 'left';
@@ -98,15 +131,7 @@ const LinearProgress = React.createClass({
     else if (step === 3) {
       barElement.style.transitionDuration = '0ms';
     }
-  },
-
-  getDefaultProps() {
-    return {
-      mode: 'indeterminate',
-      value: 0,
-      min: 0,
-      max: 100,
-    };
+    this.timers[id] = setTimeout(() => this._barUpdate(id, step + 1, barElement, stepValues), 420);
   },
 
   getTheme() {
@@ -158,6 +183,17 @@ const LinearProgress = React.createClass({
     }
 
     return styles;
+  },
+
+  _getRelativeValue() {
+    let value = this.props.value;
+    let min = this.props.min;
+    let max = this.props.max;
+
+    let clampedValue = Math.min(Math.max(min, value), max);
+    let rangeValue = max - min;
+    let relValue = Math.round(clampedValue / rangeValue * 10000) / 10000;
+    return relValue * 100;
   },
 
   render() {

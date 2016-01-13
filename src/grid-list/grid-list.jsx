@@ -5,20 +5,35 @@ import ThemeManager from '../styles/theme-manager';
 
 const GridList = React.createClass({
 
-  mixins: [
-    StylePropable,
-  ],
+  propTypes: {
+    /**
+     * Number of px for one cell height.
+     */
+    cellHeight: React.PropTypes.number,
+
+    /**
+     * Grid Tiles that will be in Grid List.
+     */
+    children: React.PropTypes.node,
+
+    /**
+     * Number of columns.
+     */
+    cols: React.PropTypes.number,
+
+    /**
+     * Number of px for the padding/spacing between items.
+     */
+    padding: React.PropTypes.number,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
-  },
-
-  propTypes: {
-    cellHeight: React.PropTypes.number,
-    children: React.PropTypes.node,
-    cols: React.PropTypes.number,
-    padding: React.PropTypes.number,
-    style: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -26,11 +41,9 @@ const GridList = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+  ],
 
   getDefaultProps() {
     return {
@@ -43,6 +56,12 @@ const GridList = React.createClass({
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 

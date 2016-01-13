@@ -6,6 +6,17 @@ import ThemeManager from './styles/theme-manager';
 
 const InkBar = React.createClass({
 
+  propTypes: {
+    color: React.PropTypes.string,
+    left: React.PropTypes.string.isRequired,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+    width: React.PropTypes.string.isRequired,
+  },
+
   contextTypes: {
     muiTheme: React.PropTypes.object,
   },
@@ -15,22 +26,19 @@ const InkBar = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
-
-  propTypes: {
-    color: React.PropTypes.string,
-    left: React.PropTypes.string.isRequired,
-    style: React.PropTypes.object,
-    width: React.PropTypes.string.isRequired,
-  },
+  mixins: [
+    StylePropable,
+  ],
 
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -40,8 +48,6 @@ const InkBar = React.createClass({
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
   },
-
-  mixins: [StylePropable],
 
   render() {
     let {
@@ -53,7 +59,7 @@ const InkBar = React.createClass({
     } = this.props;
 
     let colorStyle = color ? {backgroundColor: color} : undefined;
-    let styles = this.prepareStyles({
+    let styles = this.mergeStyles({
       left: left,
       width: width,
       bottom: 0,
@@ -66,7 +72,7 @@ const InkBar = React.createClass({
     }, this.props.style, colorStyle);
 
     return (
-      <div style={styles}>
+      <div style={this.prepareStyles(styles)}>
         &nbsp;
       </div>
     );

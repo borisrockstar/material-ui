@@ -5,9 +5,17 @@ import DefaultRawTheme from '../styles/raw-themes/light-raw-theme';
 
 const CardText = React.createClass({
 
-  mixins: [
-    StylePropable,
-  ],
+  propTypes: {
+    actAsExpander: React.PropTypes.bool,
+    children: React.PropTypes.node,
+    color: React.PropTypes.string,
+    expandable: React.PropTypes.bool,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
@@ -18,15 +26,19 @@ const CardText = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+  ],
 
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -35,14 +47,6 @@ const CardText = React.createClass({
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
-  },
-
-  propTypes: {
-    actAsExpander: React.PropTypes.bool,
-    children: React.PropTypes.node,
-    color: React.PropTypes.string,
-    expandable: React.PropTypes.bool,
-    style: React.PropTypes.object,
   },
 
   getStyles() {
@@ -58,10 +62,10 @@ const CardText = React.createClass({
 
   render() {
     let styles = this.getStyles();
-    let rootStyle = this.prepareStyles(styles.root, this.props.style);
+    let rootStyle = this.mergeStyles(styles.root, this.props.style);
 
     return (
-      <div {...this.props} style={rootStyle}>
+      <div {...this.props} style={this.prepareStyles(rootStyle)}>
         {this.props.children}
       </div>
     );

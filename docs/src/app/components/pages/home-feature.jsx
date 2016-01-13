@@ -8,8 +8,6 @@ let {Colors, Spacing, Transitions, Typography} = Styles;
 
 let HomeFeature = React.createClass({
 
-  mixins: [StylePropable, StyleResizable],
-
   propTypes: {
     firstChild: React.PropTypes.bool,
     heading: React.PropTypes.string,
@@ -17,6 +15,8 @@ let HomeFeature = React.createClass({
     lastChild: React.PropTypes.bool,
     route: React.PropTypes.string,
   },
+
+  mixins: [StylePropable, StyleResizable],
 
   getDefaultProps() {
     return {
@@ -43,8 +43,8 @@ let HomeFeature = React.createClass({
       rootWhenMedium: {
         float: 'left',
         width: '33%',
-        marginRight: '4px',
-        marginBottom: '0px',
+        marginRight: 4,
+        marginBottom: 0,
       },
       image: {
         //Not sure why this is needed but it fixes a display
@@ -52,33 +52,33 @@ let HomeFeature = React.createClass({
         marginBottom: -6,
       },
       heading: {
-        fontSize: '20px',
+        fontSize: 20,
         paddingTop: 19,
-        marginBottom: '13',
+        marginBottom: 13,
         letterSpacing: 0,
         fontWeight: Typography.fontWeightMedium,
         color: Typography.textDarkBlack,
         backgroundColor: Colors.grey200,
         textAlign: 'center',
-        margin: '0px',
-        padding: '0px',
+        margin: 0,
+        padding: 0,
         lineHeight: desktopKeylineIncrement + 'px',
       },
       rootWhenLastChild: {
-        marginBottom: '0px',
+        marginBottom: 0,
       },
       rootWhenMediumAndLastChild: {
-        marginRight: '0px',
-        marginBottom: '0px',
+        marginRight: 0,
+        marginBottom: 0,
       },
       rootWhenMediumAndFirstChild: {
-        marginLeft: '0px',
+        marginLeft: 0,
       },
     };
 
     if (this.isDeviceSize(StyleResizable.statics.Sizes.MEDIUM) ||
         this.isDeviceSize(StyleResizable.statics.Sizes.LARGE)) {
-      styles.root = this.mergeAndPrefix(
+      styles.root = this.mergeStyles(
         styles.root,
         styles.rootWhenMedium,
         this.props.firstChild && styles.rootWhenMediumAndFirstChild,
@@ -87,25 +87,6 @@ let HomeFeature = React.createClass({
     }
 
     return styles;
-  },
-
-  render() {
-    let styles = this.getStyles();
-
-    return (
-      <Paper
-        zDepth={this.state.zDepth}
-        onMouseEnter={this._onMouseEnter}
-        onMouseLeave={this._onMouseLeave}
-        style={this.mergeAndPrefix(
-          styles.root,
-          this.props.lastChild && styles.rootWhenLastChild)}>
-        <h3 style={styles.heading}>{this.props.heading}</h3>
-        <Link to={this.props.route}>
-          <img style={styles.image} src={this.props.img} />
-        </Link>
-      </Paper>
-    );
   },
 
   _onMouseEnter() {
@@ -118,6 +99,25 @@ let HomeFeature = React.createClass({
     this.setState({
       zDepth: 0,
     });
+  },
+
+  render() {
+    let styles = this.getStyles();
+
+    return (
+      <Paper
+        zDepth={this.state.zDepth}
+        onMouseEnter={this._onMouseEnter}
+        onMouseLeave={this._onMouseLeave}
+        style={this.mergeStyles(
+          styles.root,
+          this.props.lastChild && styles.rootWhenLastChild)}>
+        <h3 style={styles.heading}>{this.props.heading}</h3>
+        <Link to={this.props.route}>
+          <img style={styles.image} src={this.props.img} />
+        </Link>
+      </Paper>
+    );
   },
 
 });

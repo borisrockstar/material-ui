@@ -5,12 +5,6 @@ import ThemeManager from '../styles/theme-manager';
 
 const Toolbar = React.createClass({
 
-  mixins: [StylePropable],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
     /**
      * Can be a `ToolbarGroup` to render a group of related items.
@@ -18,7 +12,7 @@ const Toolbar = React.createClass({
     children: React.PropTypes.node,
 
     /**
-     * The css class name of the root `div` element.
+     * The css class name of the root element.
      */
     className: React.PropTypes.string,
 
@@ -28,10 +22,20 @@ const Toolbar = React.createClass({
     noGutter: React.PropTypes.bool,
 
     /**
-     * Override the inline-styles of the `Toolbar`'s root element.
+     * Override the inline-styles of the root element.
      */
     style: React.PropTypes.object,
   },
+
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+  //for passing default theme context to children
+  childContextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
+  mixins: [StylePropable],
 
   getDefaultProps() {
     return {
@@ -39,20 +43,15 @@ const Toolbar = React.createClass({
     };
   },
 
-  //for passing default theme context to children
-  childContextTypes: {
-    muiTheme: React.PropTypes.object,
+  getInitialState() {
+    return {
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
   },
 
   getChildContext() {
     return {
       muiTheme: this.state.muiTheme,
-    };
-  },
-
-  getInitialState() {
-    return {
-      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
     };
   },
 

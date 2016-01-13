@@ -7,10 +7,22 @@ import Menu from './menu/menu';
 import DefaultRawTheme from './styles/raw-themes/light-raw-theme';
 import ThemeManager from './styles/theme-manager';
 
-
 const DropDownIcon = React.createClass({
 
-  mixins: [StylePropable, ClickAwayable],
+  propTypes: {
+    children: React.PropTypes.node,
+    closeOnMenuItemTouchTap: React.PropTypes.bool,
+    iconClassName: React.PropTypes.string,
+    iconLigature: React.PropTypes.string,
+    iconStyle: React.PropTypes.object,
+    menuItems: React.PropTypes.array.isRequired,
+    onChange: React.PropTypes.func,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
@@ -21,21 +33,12 @@ const DropDownIcon = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [StylePropable, ClickAwayable],
 
-  propTypes: {
-    children: React.PropTypes.node,
-    closeOnMenuItemTouchTap: React.PropTypes.bool,
-    iconClassName: React.PropTypes.string,
-    iconLigature: React.PropTypes.string,
-    iconStyle: React.PropTypes.object,
-    menuItems: React.PropTypes.array.isRequired,
-    onChange: React.PropTypes.func,
-    style: React.PropTypes.object,
+  getDefaultProps() {
+    return {
+      closeOnMenuItemTouchTap: true,
+    };
   },
 
   getInitialState() {
@@ -45,16 +48,9 @@ const DropDownIcon = React.createClass({
     };
   },
 
-  //to update theme inside state whenever a new theme is passed down
-  //from the parent / owner using context
-  componentWillReceiveProps(nextProps, nextContext) {
-    let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
-    this.setState({muiTheme: newMuiTheme});
-  },
-
-  getDefaultProps() {
+  getChildContext() {
     return {
-      closeOnMenuItemTouchTap: true,
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -63,6 +59,13 @@ const DropDownIcon = React.createClass({
     // if (process.env.NODE_ENV !== 'production') {
     //   console.warn('DropDownIcon has been deprecated. Use IconMenu instead.');
     // }
+  },
+
+  //to update theme inside state whenever a new theme is passed down
+  //from the parent / owner using context
+  componentWillReceiveProps(nextProps, nextContext) {
+    let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+    this.setState({muiTheme: newMuiTheme});
   },
 
   componentClickAway() {
@@ -96,39 +99,6 @@ const DropDownIcon = React.createClass({
     return styles;
   },
 
-  render() {
-    let {
-      style,
-      children,
-      menuItems,
-      closeOnMenuItemTouchTap,
-      iconStyle,
-      iconClassName,
-      ...other,
-    } = this.props;
-
-    let styles = this.getStyles();
-
-    return (
-      <div {...other} style={this.prepareStyles(styles.root, this.props.style)}>
-          <div onTouchTap={this._onControlClick}>
-              <FontIcon
-                className={iconClassName}
-                style={iconStyle}>{this.props.iconLigature}</FontIcon>
-              {this.props.children}
-          </div>
-          <Menu
-            ref="menuItems"
-            style={styles.menu}
-            menuItems={menuItems}
-            menuItemStyle={styles.menuItem}
-            hideable={true}
-            visible={this.state.open}
-            onItemTap={this._onMenuItemClick} />
-        </div>
-    );
-  },
-
   _onControlClick() {
     this.setState({open: !this.state.open});
   },
@@ -140,6 +110,45 @@ const DropDownIcon = React.createClass({
       this.setState({open: false});
     }
   },
+
+  render() {
+    const {
+      style,
+      children,
+      menuItems,
+      closeOnMenuItemTouchTap,
+      iconStyle,
+      iconLigature,
+      iconClassName,
+      ...other,
+    } = this.props;
+
+    const styles = this.getStyles();
+
+    return (
+      <div {...other} style={this.prepareStyles(styles.root, style)}>
+        <div onTouchTap={this._onControlClick}>
+          <FontIcon
+            className={iconClassName}
+            style={iconStyle}
+          >
+            {iconLigature}
+          </FontIcon>
+          {children}
+        </div>
+        <Menu
+          ref="menuItems"
+          style={styles.menu}
+          menuItems={menuItems}
+          menuItemStyle={styles.menuItem}
+          hideable={true}
+          visible={this.state.open}
+          onItemTap={this._onMenuItemClick}
+        />
+      </div>
+    );
+  },
+
 });
 
 export default DropDownIcon;

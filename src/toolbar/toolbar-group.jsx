@@ -5,13 +5,6 @@ import DefaultRawTheme from '../styles/raw-themes/light-raw-theme';
 import ThemeManager from '../styles/theme-manager';
 
 const ToolbarGroup = React.createClass({
-
-  mixins: [StylePropable],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
     /**
      * Can be any node or number of nodes.
@@ -19,7 +12,7 @@ const ToolbarGroup = React.createClass({
     children: React.PropTypes.node,
 
     /**
-     * The css class name of the root `div` element.
+     * The css class name of the root element.
      */
     className: React.PropTypes.string,
 
@@ -41,9 +34,13 @@ const ToolbarGroup = React.createClass({
     lastChild: React.PropTypes.bool,
 
     /**
-     * Override the inline-styles of the `ToolbarGroup`'s root element.
+     * Override the inline-styles of the root element.
      */
     style: React.PropTypes.object,
+  },
+
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -51,11 +48,7 @@ const ToolbarGroup = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [StylePropable],
 
   getDefaultProps() {
     return {
@@ -68,6 +61,12 @@ const ToolbarGroup = React.createClass({
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -144,6 +143,26 @@ const ToolbarGroup = React.createClass({
     return styles;
   },
 
+  _handleMouseEnterDropDownMenu(e) {
+    e.target.style.zIndex = this.getStyles().icon.hover.zIndex;
+    e.target.style.color = this.getStyles().icon.hover.color;
+  },
+
+  _handleMouseLeaveDropDownMenu(e) {
+    e.target.style.zIndex = 'auto';
+    e.target.style.color = this.getStyles().icon.root.color;
+  },
+
+  _handleMouseEnterFontIcon(e) {
+    e.target.style.zIndex = this.getStyles().icon.hover.zIndex;
+    e.target.style.color = this.getStyles().icon.hover.color;
+  },
+
+  _handleMouseLeaveFontIcon(e) {
+    e.target.style.zIndex = 'auto';
+    e.target.style.color = this.getStyles().icon.root.color;
+  },
+
   render() {
     const {
       children,
@@ -200,26 +219,6 @@ const ToolbarGroup = React.createClass({
         {newChildren}
       </div>
     );
-  },
-
-  _handleMouseEnterDropDownMenu(e) {
-    e.target.style.zIndex = this.getStyles().icon.hover.zIndex;
-    e.target.style.color = this.getStyles().icon.hover.color;
-  },
-
-  _handleMouseLeaveDropDownMenu(e) {
-    e.target.style.zIndex = 'auto';
-    e.target.style.color = this.getStyles().icon.root.color;
-  },
-
-  _handleMouseEnterFontIcon(e) {
-    e.target.style.zIndex = this.getStyles().icon.hover.zIndex;
-    e.target.style.color = this.getStyles().icon.hover.color;
-  },
-
-  _handleMouseLeaveFontIcon(e) {
-    e.target.style.zIndex = 'auto';
-    e.target.style.color = this.getStyles().icon.root.color;
   },
 });
 

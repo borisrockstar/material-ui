@@ -6,21 +6,49 @@ import ThemeManager from '../styles/theme-manager';
 
 const TableHeaderColumn = React.createClass({
 
-  mixins: [StylePropable],
+  propTypes: {
+    children: React.PropTypes.node,
+
+    /**
+     * The css class name of the root element.
+     */
+    className: React.PropTypes.string,
+
+    /**
+     * Number to identify the header row. This property
+     * is automatically populated when used with TableHeader.
+     */
+    columnNumber: React.PropTypes.number,
+
+    /**
+     * Key prop for table header column.
+     */
+    key: React.PropTypes.string,
+
+    /**
+     * Callback function for click event.
+     */
+    onClick: React.PropTypes.func,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+
+    /**
+     * The string to supply to the tooltip. If not
+     * string is supplied no tooltip will be shown.
+     */
+    tooltip: React.PropTypes.string,
+
+    /**
+     * Additional styling that can be applied to the tooltip.
+     */
+    tooltipStyle: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
-  },
-
-  propTypes: {
-    children: React.PropTypes.node,
-    className: React.PropTypes.string,
-    columnNumber: React.PropTypes.number,
-    key: React.PropTypes.string,
-    onClick: React.PropTypes.func,
-    style: React.PropTypes.object,
-    tooltip: React.PropTypes.string,
-    tooltipStyle: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -28,16 +56,18 @@ const TableHeaderColumn = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [StylePropable],
 
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
       hovered: false,
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -55,7 +85,7 @@ const TableHeaderColumn = React.createClass({
   getStyles() {
     let theme = this.getTheme();
     let styles = {
-      root:  {
+      root: {
         fontWeight: 'normal',
         fontSize: 12,
         paddingLeft: theme.spacing,
@@ -76,6 +106,18 @@ const TableHeaderColumn = React.createClass({
     return styles;
   },
 
+  _onMouseEnter() {
+    if (this.props.tooltip !== undefined) this.setState({hovered: true});
+  },
+
+  _onMouseLeave() {
+    if (this.props.tooltip !== undefined) this.setState({hovered: false});
+  },
+
+  _onClick(e) {
+    if (this.props.onClick) this.props.onClick(e, this.props.columnNumber);
+  },
+
   render() {
     let styles = this.getStyles();
     let handlers = {
@@ -92,9 +134,6 @@ const TableHeaderColumn = React.createClass({
       tooltipStyle,
       ...other,
     } = this.props;
-    let classes = 'mui-table-header-column';
-    if (className) classes += ' ' + className;
-
     if (this.props.tooltip !== undefined) {
       tooltip = (
         <Tooltip
@@ -107,7 +146,7 @@ const TableHeaderColumn = React.createClass({
     return (
       <th
         key={this.props.key}
-        className={classes}
+        className={className}
         style={this.prepareStyles(styles.root, style)}
         {...handlers}
         {...other}>
@@ -115,18 +154,6 @@ const TableHeaderColumn = React.createClass({
         {this.props.children}
       </th>
     );
-  },
-
-  _onMouseEnter() {
-    if (this.props.tooltip !== undefined) this.setState({hovered: true});
-  },
-
-  _onMouseLeave() {
-    if (this.props.tooltip !== undefined) this.setState({hovered: false});
-  },
-
-  _onClick(e) {
-    if (this.props.onClick) this.props.onClick(e, this.props.columnNumber);
   },
 
 });

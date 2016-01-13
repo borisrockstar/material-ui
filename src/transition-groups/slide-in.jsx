@@ -5,10 +5,19 @@ import SlideInChild from './slide-in-child';
 import DefaultRawTheme from '../styles/raw-themes/light-raw-theme';
 import ThemeManager from '../styles/theme-manager';
 
-
 const SlideIn = React.createClass({
 
-  mixins: [StylePropable],
+  propTypes: {
+    childStyle: React.PropTypes.object,
+    children: React.PropTypes.node,
+    direction: React.PropTypes.oneOf(['left', 'right', 'up', 'down']),
+    enterDelay: React.PropTypes.number,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
@@ -19,15 +28,24 @@ const SlideIn = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
+  mixins: [StylePropable],
+
+  getDefaultProps() {
     return {
-      muiTheme: this.state.muiTheme,
+      enterDelay: 0,
+      direction: 'left',
     };
   },
 
   getInitialState() {
     return {
       muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
     };
   },
 
@@ -38,19 +56,8 @@ const SlideIn = React.createClass({
     this.setState({muiTheme: newMuiTheme});
   },
 
-  propTypes: {
-    childStyle: React.PropTypes.object,
-    children: React.PropTypes.node,
-    direction: React.PropTypes.oneOf(['left', 'right', 'up', 'down']),
-    enterDelay: React.PropTypes.number,
-    style: React.PropTypes.object,
-  },
-
-  getDefaultProps() {
-    return {
-      enterDelay: 0,
-      direction: 'left',
-    };
+  _getLeaveDirection() {
+    return this.props.direction;
   },
 
   render() {
@@ -63,7 +70,7 @@ const SlideIn = React.createClass({
       ...other,
     } = this.props;
 
-    let mergedRootStyles = this.prepareStyles({
+    let mergedRootStyles = this.mergeStyles({
       position: 'relative',
       overflow: 'hidden',
       height: '100%',
@@ -85,15 +92,11 @@ const SlideIn = React.createClass({
     return (
       <ReactTransitionGroup
         {...other}
-        style={mergedRootStyles}
+        style={this.prepareStyles(mergedRootStyles)}
         component="div">
         {newChildren}
       </ReactTransitionGroup>
     );
-  },
-
-  _getLeaveDirection() {
-    return this.props.direction;
   },
 
 });

@@ -6,18 +6,17 @@ import ThemeManager from '../styles/theme-manager';
 
 const FlatButtonLabel = React.createClass({
 
-  mixins: [
-    ContextPure,
-    StylePropable,
-  ],
+  propTypes: {
+    label: React.PropTypes.node,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
+    style: React.PropTypes.object,
+  },
 
   contextTypes: {
     muiTheme: React.PropTypes.object,
-  },
-
-  propTypes: {
-    label: React.PropTypes.node,
-    style: React.PropTypes.object,
   },
 
   //for passing default theme context to children
@@ -25,10 +24,17 @@ const FlatButtonLabel = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
+  mixins: [
+    ContextPure,
+    StylePropable,
+  ],
+
+  statics: {
+    getRelevantContextKeys(muiTheme) {
+      return {
+        spacingDesktopGutterLess: muiTheme.rawTheme.spacing.desktopGutterLess,
+      };
+    },
   },
 
   getInitialState() {
@@ -37,19 +43,17 @@ const FlatButtonLabel = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
   //to update theme inside state whenever a new theme is passed down
   //from the parent / owner using context
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
     this.setState({muiTheme: newMuiTheme});
-  },
-
-  statics: {
-    getRelevantContextKeys(muiTheme) {
-      return {
-        spacingDesktopGutterLess: muiTheme.rawTheme.spacing.desktopGutterLess,
-      };
-    },
   },
 
   render: function() {

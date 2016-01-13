@@ -8,25 +8,41 @@ import ThemeManager from './styles/theme-manager';
 
 const Tooltip = React.createClass({
 
-  mixins: [StylePropable],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
+    /**
+     * The css class name of the root element.
+     */
     className: React.PropTypes.string,
     horizontalPosition: React.PropTypes.oneOf(['left', 'right', 'center']),
     label: React.PropTypes.node.isRequired,
     show: React.PropTypes.bool,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
     touch: React.PropTypes.bool,
     verticalPosition: React.PropTypes.oneOf(['top', 'bottom']),
   },
 
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
   //for passing default theme context to children
   childContextTypes: {
     muiTheme: React.PropTypes.object,
+  },
+
+  mixins: [
+    StylePropable,
+  ],
+
+  getInitialState() {
+    return {
+      offsetWidth: null,
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+    };
   },
 
   getChildContext() {
@@ -53,13 +69,6 @@ const Tooltip = React.createClass({
     this._setRippleSize();
   },
 
-  getInitialState() {
-    return {
-      offsetWidth: null,
-      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
-    };
-  },
-
   getStyles() {
     let verticalPosition = this.props.verticalPosition;
     let horizontalPosition = this.props.horizontalPosition;
@@ -68,7 +77,8 @@ const Tooltip = React.createClass({
     let offset = verticalPosition === 'bottom' ?
       14 + touchMarginOffset : -14 - touchMarginOffset;
 
-    const rawTheme = this.state.muiTheme.rawTheme;
+    const muiTheme = this.state.muiTheme;
+    const rawTheme = muiTheme.rawTheme;
 
     let styles = {
       root: {
@@ -77,7 +87,7 @@ const Tooltip = React.createClass({
         fontSize: '10px',
         lineHeight: '22px',
         padding: '0 8px',
-        zIndex: rawTheme.zIndex.tooltip,
+        zIndex: muiTheme.zIndex.tooltip,
         color: Colors.white,
         overflow: 'hidden',
         top: -10000,
@@ -136,6 +146,30 @@ const Tooltip = React.createClass({
     return styles;
   },
 
+  _setRippleSize() {
+    let ripple = ReactDOM.findDOMNode(this.refs.ripple);
+    let tooltip = window.getComputedStyle(ReactDOM.findDOMNode(this));
+    let tooltipWidth = parseInt(tooltip.getPropertyValue('width'), 10) /
+      (this.props.horizontalPosition === 'center' ? 2 : 1);
+    let tooltipHeight = parseInt(tooltip.getPropertyValue('height'), 10);
+
+    let rippleDiameter = Math.ceil((Math.sqrt(Math.pow(tooltipHeight, 2) +
+                                    Math.pow(tooltipWidth, 2) ) * 2));
+    if (this.props.show) {
+      ripple.style.height = rippleDiameter + 'px';
+      ripple.style.width = rippleDiameter + 'px';
+    }
+    else {
+      ripple.style.width = '0px';
+      ripple.style.height = '0px';
+    }
+  },
+
+  _setTooltipPosition() {
+    let tooltip = ReactDOM.findDOMNode(this);
+    this.setState({offsetWidth: tooltip.offsetWidth});
+  },
+
   render() {
     const {
       label,
@@ -163,30 +197,6 @@ const Tooltip = React.createClass({
         </span>
       </div>
     );
-  },
-
-  _setRippleSize() {
-    let ripple = ReactDOM.findDOMNode(this.refs.ripple);
-    let tooltip = window.getComputedStyle(ReactDOM.findDOMNode(this));
-    let tooltipWidth = parseInt(tooltip.getPropertyValue('width'), 10) /
-      (this.props.horizontalPosition === 'center' ? 2 : 1);
-    let tooltipHeight = parseInt(tooltip.getPropertyValue('height'), 10);
-
-    let rippleDiameter = Math.ceil((Math.sqrt(Math.pow(tooltipHeight, 2) +
-                                    Math.pow(tooltipWidth, 2) ) * 2));
-    if (this.props.show) {
-      ripple.style.height = rippleDiameter + 'px';
-      ripple.style.width = rippleDiameter + 'px';
-    }
-    else {
-      ripple.style.width = '0px';
-      ripple.style.height = '0px';
-    }
-  },
-
-  _setTooltipPosition() {
-    let tooltip = ReactDOM.findDOMNode(this);
-    this.setState({offsetWidth: tooltip.offsetWidth});
   },
 
 });

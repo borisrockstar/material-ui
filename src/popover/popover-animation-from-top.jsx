@@ -7,22 +7,18 @@ import ThemeManager from '../styles/theme-manager';
 import Paper from '../paper';
 
 const PopoverAnimationFromTop = React.createClass({
-  mixins: [StylePropable],
 
   propTypes: {
     children: React.PropTypes.node,
     className: React.PropTypes.string,
     open: React.PropTypes.bool.isRequired,
+
+    /**
+     * Override the inline-styles of the root element.
+     */
     style: React.PropTypes.object,
     targetOrigin: PropTypes.origin,
     zDepth: PropTypes.zDepth,
-  },
-
-  getInitialState() {
-    return {
-      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
-      open: false,
-    };
   },
 
   contextTypes: {
@@ -34,11 +30,9 @@ const PopoverAnimationFromTop = React.createClass({
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+  ],
 
   getDefaultProps() {
     return {
@@ -47,16 +41,29 @@ const PopoverAnimationFromTop = React.createClass({
     };
   },
 
+  getInitialState() {
+    return {
+      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme),
+      open: false,
+    };
+  },
+
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
   componentDidMount() {
-    this.setState({open:true}); //eslint-disable-line react/no-did-mount-set-state
+    this.setState({open: true}); //eslint-disable-line react/no-did-mount-set-state
   },
 
   componentWillReceiveProps(nextProps, nextContext) {
     let newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
 
     this.setState({
-      open:nextProps.open,
-      muiTheme:newMuiTheme,
+      open: nextProps.open,
+      muiTheme: newMuiTheme,
     });
   },
 
@@ -66,13 +73,13 @@ const PopoverAnimationFromTop = React.createClass({
 
     return {
       base: {
-        opacity:0,
-        transform:'scaleY(0)',
+        opacity: 0,
+        transform: 'scaleY(0)',
         transformOrigin: `${horizontal} ${targetOrigin.vertical}`,
         position: 'fixed',
         zIndex: this.state.muiTheme.zIndex.popover,
         transition: Transitions.easeOut('450ms', ['transform', 'opacity']),
-        maxHeight:'100%',
+        maxHeight: '100%',
       },
 
     };
@@ -82,7 +89,7 @@ const PopoverAnimationFromTop = React.createClass({
     return {
       base: {
         opacity: 1,
-        transform:'scaleY(1)',
+        transform: 'scaleY(1)',
       },
     };
   },

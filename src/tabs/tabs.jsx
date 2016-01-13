@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// I'm using require not to break react-codmod
-const TabTemplate = require('./tabTemplate');
+import TabTemplate from './tabTemplate';
 import InkBar from '../ink-bar';
 import StylePropable from '../mixins/style-propable';
 import Controllable from '../mixins/controllable';
@@ -11,18 +10,9 @@ import warning from 'warning';
 
 const Tabs = React.createClass({
 
-  mixins: [
-    StylePropable,
-    Controllable,
-  ],
-
-  contextTypes: {
-    muiTheme: React.PropTypes.object,
-  },
-
   propTypes: {
     /**
-     * Should be used to pass Tab components.
+     * Should be used to pass `Tab` components.
      */
     children: React.PropTypes.node,
 
@@ -80,20 +70,22 @@ const Tabs = React.createClass({
     value: React.PropTypes.any,
   },
 
+  contextTypes: {
+    muiTheme: React.PropTypes.object,
+  },
+
   childContextTypes: {
     muiTheme: React.PropTypes.object,
   },
 
-  getChildContext() {
-    return {
-      muiTheme: this.state.muiTheme,
-    };
-  },
+  mixins: [
+    StylePropable,
+    Controllable,
+  ],
 
   getDefaultProps() {
     return {
       initialSelectedIndex: 0,
-      tabTemplate: TabTemplate,
     };
   },
 
@@ -111,6 +103,23 @@ const Tabs = React.createClass({
     };
   },
 
+  getChildContext() {
+    return {
+      muiTheme: this.state.muiTheme,
+    };
+  },
+
+  componentWillReceiveProps(newProps, nextContext) {
+    const valueLink = this.getValueLink(newProps);
+    const newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+
+    if (valueLink.value !== undefined) {
+      this.setState({selectedIndex: this._getSelectedIndex(newProps)});
+    }
+
+    this.setState({muiTheme: newMuiTheme});
+  },
+
   getEvenWidth() {
     return (
       parseInt(window
@@ -123,15 +132,39 @@ const Tabs = React.createClass({
     return React.Children.count(this.props.children);
   },
 
-  componentWillReceiveProps(newProps, nextContext) {
-    const valueLink = this.getValueLink(newProps);
-    const newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+  _getSelectedIndex(props) {
+    let valueLink = this.getValueLink(props);
+    let selectedIndex = -1;
 
-    if (valueLink.value !== undefined) {
-      this.setState({selectedIndex: this._getSelectedIndex(newProps)});
+    React.Children.forEach(props.children, (tab, index) => {
+      if (valueLink.value === tab.props.value) {
+        selectedIndex = index;
+      }
+    });
+
+    return selectedIndex;
+  },
+
+  _handleTabTouchTap(value, e, tab) {
+    let valueLink = this.getValueLink(this.props);
+    let tabIndex = tab.props.tabIndex;
+
+    if ((valueLink.value && valueLink.value !== value) ||
+      this.state.selectedIndex !== tabIndex) {
+      valueLink.requestChange(value, e, tab);
     }
 
-    this.setState({muiTheme: newMuiTheme});
+    this.setState({selectedIndex: tabIndex});
+
+    if (tab.props.onActive) {
+      tab.props.onActive(tab);
+    }
+  },
+
+  _getSelected(tab, index) {
+    let valueLink = this.getValueLink(this.props);
+    return valueLink.value ? valueLink.value === tab.props.value :
+      this.state.selectedIndex === index;
   },
 
   render() {
@@ -179,7 +212,7 @@ const Tabs = React.createClass({
         to be a controlled component.`);
 
       tabContent.push(tab.props.children ?
-        React.createElement(tabTemplate, {
+        React.createElement(tabTemplate || TabTemplate, {
           key: index,
           selected: this._getSelected(tab, index),
         }, tab.props.children) : undefined);
@@ -223,42 +256,6 @@ const Tabs = React.createClass({
       </div>
     );
   },
-
-  _getSelectedIndex(props) {
-    let valueLink = this.getValueLink(props);
-    let selectedIndex = -1;
-
-    React.Children.forEach(props.children, (tab, index) => {
-      if (valueLink.value === tab.props.value) {
-        selectedIndex = index;
-      }
-    });
-
-    return selectedIndex;
-  },
-
-  _handleTabTouchTap(value, e, tab) {
-    let valueLink = this.getValueLink(this.props);
-    let tabIndex = tab.props.tabIndex;
-
-    if ((valueLink.value && valueLink.value !== value) ||
-      this.state.selectedIndex !== tabIndex) {
-      valueLink.requestChange(value, e, tab);
-    }
-
-    this.setState({selectedIndex: tabIndex});
-
-    if (tab.props.onActive) {
-      tab.props.onActive(tab);
-    }
-  },
-
-  _getSelected(tab, index) {
-    let valueLink = this.getValueLink(this.props);
-    return valueLink.value ? valueLink.value === tab.props.value :
-      this.state.selectedIndex === index;
-  },
-
 });
 
 export default Tabs;

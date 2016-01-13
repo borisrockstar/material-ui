@@ -1,6 +1,5 @@
 import React from 'react';
-import DefaultRawTheme from './styles/raw-themes/light-raw-theme';
-import ThemeManager from './styles/theme-manager';
+import muiThemeable from './muiThemeable';
 import styleUtils from './utils/styles';
 
 const propTypes = {
@@ -15,24 +14,16 @@ const propTypes = {
   inset: React.PropTypes.bool,
 
   /**
-   * Override the inline-styles of the list divider's root element
+   * Override the inline-styles of the root element.
    */
   style: React.PropTypes.object,
-};
-
-const contextTypes = {
-  muiTheme: React.PropTypes.object,
-};
-
-const childContextTypes = {
-  muiTheme: React.PropTypes.object,
 };
 
 const defaultProps = {
   inset: false,
 };
 
-const Divider = ({inset, style, ...other}, {muiTheme = ThemeManager.getMuiTheme(DefaultRawTheme)}) => {
+let Divider = ({inset, muiTheme, style, ...other}) => {
   const styles = {
     root: {
       margin: 0,
@@ -49,9 +40,9 @@ const Divider = ({inset, style, ...other}, {muiTheme = ThemeManager.getMuiTheme(
   );
 };
 
+Divider.displayName = 'Divider';
 Divider.propTypes = propTypes;
 Divider.defaultProps = defaultProps;
-Divider.contextTypes = contextTypes;
-Divider.childContextTypes = childContextTypes;
+Divider = muiThemeable(Divider);
 
 export default Divider;
